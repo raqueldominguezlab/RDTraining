@@ -41,11 +41,25 @@ type Service = {
   }
 }
 
+type Product = {
+  id: string
+  slug: string
+  title: string
+  shortDescription: string
+  priceCents: number
+  image?: {
+    url: string
+    alt?: string
+  }
+}
+
 type HomeClientProps = {
   heroDataEs: HeroData
   heroDataEn: HeroData
   servicesEs: Service[]
   servicesEn: Service[]
+  productsEs: Product[]
+  productsEn: Product[]
   aboutSectionEs: {
     title: string
     subtitle: string
@@ -87,6 +101,8 @@ export default function HomeClient({
   heroDataEn,
   servicesEs,
   servicesEn,
+  productsEs,
+  productsEn,
   aboutSectionEs,
   aboutSectionEn,
   bestForYouEs,
@@ -139,9 +155,10 @@ export default function HomeClient({
       {/* Content */}
       <HeroClient data={locale === 'es' ? heroDataEs : heroDataEn} />
       <AboutSection  aboutData={locale === 'es' ? aboutSectionEs : aboutSectionEn} />
-      <ServicesClient 
+      <ServicesClient
         id="servicios"
         services={locale === 'es' ? servicesEs : servicesEn}
+        products={locale === 'es' ? productsEs : productsEn}
         locale={locale}
       />
       <GalleryClient data={locale === 'es' ? galleryEs : galleryEn} />

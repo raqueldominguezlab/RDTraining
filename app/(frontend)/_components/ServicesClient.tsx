@@ -1,5 +1,19 @@
 'use client'
 
+import { useCallback, useState } from 'react'
+
+type Product = {
+  id: string
+  slug: string
+  title: string
+  shortDescription: string
+  priceCents: number
+  image?: {
+    url: string
+    alt?: string
+  }
+}
+
 type Service = {
   id: string
   title: string
@@ -35,11 +49,12 @@ const iconMap: Record<string, string> = {
 
 interface ServicesClientProps {
   services: Service[]
+  products?: Product[]
   id?: string
   locale?: 'es' | 'en'
 }
 
-export default function ServicesClient({ services, id, locale = 'es' }: ServicesClientProps) {
+export default function ServicesClient({ services, products = [], id, locale = 'es' }: ServicesClientProps) {
   const getPriceDisplay = (service: Service) => {
     if (service.price?.customText) {
       return service.price.customText
@@ -180,10 +195,13 @@ export default function ServicesClient({ services, id, locale = 'es' }: Services
               </div>
             </div>
           ))}
+          {products.map((product) => (
+            <ProductBuyCard key={product.id} product={product} locale={locale} />
+          ))}
         </div>
 
         {/* Empty State */}
-        {services.length === 0 && (
+        {services.length === 0 && products.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400 text-lg">
               Próximamente nuevos servicios...
@@ -192,5 +210,121 @@ export default function ServicesClient({ services, id, locale = 'es' }: Services
         )}
       </div>
     </section>
+  )
+}
+
+const productText = {
+  es: {
+    emailPlaceholder: 'tu@email.com',
+    buyButton: (price: string) => `Comprar — ${price}`,
+    loading: 'Conectando con tu banco…',
+    secure: 'Pago seguro con tarjeta a través de Redsys. Recibirás el PDF en tu email al instante.',
+    genericError: 'No se pudo iniciar el pago',
+    unexpectedError: 'Error inesperado, inténtalo de nuevo',
+  },
+  en: {
+    emailPlaceholder: 'you@email.com',
+    buyButton: (price: string) => `Buy — ${price}`,
+    loading: 'Connecting to your bank…',
+    secure: 'Secure card payment via Redsys. You will receive the PDF in your email instantly.',
+    genericError: 'Could not start the payment',
+    unexpectedError: 'Unexpected error, please try again',
+  },
+} as const
+
+function ProductBuyCard({ product, locale }: { product: Product; locale: 'es' | 'en' }) {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const tr = productText[locale]
+
+  const priceFormatted = new Intl.NumberFormat(locale === 'es' ? 'es-ES' : 'en-GB', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(product.priceCents / 100)
+
+  const handleBuy = useCallback(async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      const res = await fetch('/api/products/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: product.slug, email }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error ?? tr.genericError)
+        setLoading(false)
+        return
+      }
+
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = data.redsysUrl
+      const fields: Record<string, string> = {
+        Ds_SignatureVersion: data.Ds_SignatureVersion,
+        Ds_MerchantParameters: data.Ds_MerchantParameters,
+        Ds_Signature: data.Ds_Signature,
+      }
+      for (const [name, value] of Object.entries(fields)) {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = name
+        input.value = value
+        form.appendChild(input)
+      }
+      document.body.appendChild(form)
+      form.submit()
+    } catch {
+      setError(tr.unexpectedError)
+      setLoading(false)
+    }
+  }, [email, product.slug, tr])
+
+  return (
+    <div className="relative w-full bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between">
+      {product.image?.url ? (
+        <div className="aspect-[16/9] bg-gradient-to-br from-accent-400 to-accent-600 overflow-hidden flex items-center justify-center">
+          <img
+            src={product.image.url}
+            alt={product.image.alt || product.title}
+            className="w-full h-full object-contain"
+          />
+        </div>
+      ) : (
+        <div className="aspect-[16/9] bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center">
+          <span className="text-7xl">📄</span>
+        </div>
+      )}
+
+      <div className="p-6 flex-1">
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{product.title}</h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-4">{product.shortDescription}</p>
+      </div>
+
+      <div className="p-6 flex flex-col gap-3">
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-2xl font-bold text-accent-600 dark:text-accent-400">{priceFormatted}</p>
+        </div>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={tr.emailPlaceholder}
+          autoComplete="email"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base"
+        />
+        <button
+          onClick={handleBuy}
+          disabled={loading || !email}
+          className="w-full text-center bg-accent-500 hover:bg-accent-600 disabled:opacity-60 disabled:cursor-wait text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+        >
+          {loading ? tr.loading : tr.buyButton(priceFormatted)}
+        </button>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{tr.secure}</p>
+        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      </div>
+    </div>
   )
 }

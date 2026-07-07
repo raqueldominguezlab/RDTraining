@@ -11,6 +11,8 @@
     "seed:services": "tsx scripts/seed-services.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.995.0",
+    "@aws-sdk/s3-request-presigner": "^3.995.0",
     "@payloadcms/db-postgres": "^3.77.0",
     "@payloadcms/next": "^3.77.0",
     "@payloadcms/richtext-lexical": "^3.77.0",

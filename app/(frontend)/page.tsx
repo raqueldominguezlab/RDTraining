@@ -44,11 +44,13 @@ export default async function Home() {
   const payload = await getPayload({ config })
   
   // Fetch data for both locales
-  const [heroDataEs, heroDataEn, servicesEs, servicesEn, aboutSectionEs, aboutSectionEn, bestForYouEs, bestForYouEn, galleryEs, galleryEn] = await Promise.all([
+  const [heroDataEs, heroDataEn, servicesEs, servicesEn, productsEs, productsEn, aboutSectionEs, aboutSectionEn, bestForYouEs, bestForYouEn, galleryEs, galleryEn] = await Promise.all([
     fetchHeroData(payload, 'es'),
     fetchHeroData(payload, 'en'),
     fetchServices(payload, 'es'),
     fetchServices(payload, 'en'),
+    fetchProducts(payload, 'es'),
+    fetchProducts(payload, 'en'),
     fetchAboutSection(payload, 'es'),
     fetchAboutSection(payload, 'en'),
     fetchBestForYou(payload, 'es'),
@@ -56,13 +58,15 @@ export default async function Home() {
     fetchGallery(payload, 'es'),
     fetchGallery(payload, 'en'),
   ])
-  
+
   return (
-    <HomeClient 
-      heroDataEs={heroDataEs} 
+    <HomeClient
+      heroDataEs={heroDataEs}
       heroDataEn={heroDataEn}
       servicesEs={servicesEs}
       servicesEn={servicesEn}
+      productsEs={productsEs}
+      productsEn={productsEn}
       aboutSectionEs={aboutSectionEs}
       aboutSectionEn={aboutSectionEn}
       bestForYouEs={bestForYouEs}
@@ -199,6 +203,34 @@ async function fetchServices(payload: any, locale: 'es' | 'en') {
     }))
   } catch (error) {
     console.error(`Error loading Services for locale ${locale}:`, error)
+    return []
+  }
+}
+
+async function fetchProducts(payload: any, locale: 'es' | 'en') {
+  try {
+    const result = await payload.find({
+      collection: 'products',
+      where: {
+        active: { equals: true },
+      },
+      locale: locale,
+      limit: 50,
+    })
+
+    return result.docs.map((product: any) => ({
+      id: product.id,
+      slug: product.slug,
+      title: product.title,
+      shortDescription: product.shortDescription,
+      priceCents: product.priceCents,
+      image: product.image?.url ? {
+        url: product.image.url,
+        alt: product.image.alt || product.title,
+      } : undefined,
+    }))
+  } catch (error) {
+    console.error(`Error loading Products for locale ${locale}:`, error)
     return []
   }
 }

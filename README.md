@@ -141,12 +141,31 @@ La imagen de Open Graph se genera automáticamente a partir de la **imagen del H
 ```env
 DATABASE_URL=           # PostgreSQL (Neon)
 PAYLOAD_SECRET=         # Clave secreta Payload (mín. 32 chars)
-S3_BUCKET=              # Nombre del bucket R2
+S3_BUCKET=              # Nombre del bucket R2 (público, para media)
 S3_ACCESS_KEY_ID=       # Credencial R2
 S3_SECRET_ACCESS_KEY=   # Credencial R2
 S3_REGION=auto          # Región R2
 S3_ENDPOINT=            # Endpoint R2 (https://<id>.r2.cloudflarestorage.com)
 R2_PUBLIC_URL=          # URL pública del bucket R2
+
+# Pasarela de pago (suscripciones, /pago)
+REDSYS_SECRET_KEY=      # Clave secreta SHA-256 del TPV (Base64)
+REDSYS_FUC=             # Código de comercio
+REDSYS_TERMINAL=        # Terminal (normalmente "1")
+REDSYS_ENVIRONMENT=     # "test" | "production"
+NEXT_PUBLIC_SITE_URL=   # URL raíz del sitio
+
+# Email de contacto
+RESEND_API_KEY=
+CONTACT_EMAIL_FROM=
+CONTACT_EMAIL_TO=
+
+# Productos de pago único (PDF) — bucket R2 PRIVADO, sin dominio público
+R2_PRIVATE_BUCKET=
+R2_PRIVATE_ACCESS_KEY_ID=
+R2_PRIVATE_SECRET_ACCESS_KEY=
+R2_PRIVATE_ENDPOINT=
+PRODUCT_EMAIL_FROM=     # Remitente del email de entrega del PDF
 ```
 
 ---
