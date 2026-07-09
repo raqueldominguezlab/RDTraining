@@ -14,6 +14,8 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rdominguezg.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  // Web solo accesible por enlace directo: no indexar en buscadores.
+  robots: { index: false, follow: false },
   title: {
     default: 'Raquel Domínguez - Entrenamiento Personalizado',
     template: '%s | Raquel Domínguez',
