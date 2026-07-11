@@ -243,7 +243,7 @@ async function fetchAboutSection(payload: any, locale: 'es' | 'en') {
     })
     
     return {
-      title: section?.title || 'Mi Historia',
+      title: section?.title || '',
       subtitle: section?.subtitle || '',
       photo: section?.photo?.url ? {
         url: section.photo.url,

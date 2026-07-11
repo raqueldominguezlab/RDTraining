@@ -29,13 +29,15 @@ export default function AboutClient({ aboutData }: { aboutData: AboutData }) {
     <section className="w-full py-16 md:py-16 bg-white dark:bg-gray-800">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Intro */}
-        <div className="-mb-4 md:-mb-0">
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl md:text-3xl lg:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight text-center">
-              {aboutData.title}
-            </h3>
+        {aboutData.title && (
+          <div className="-mb-4 md:-mb-0">
+            <div className="max-w-4xl mx-auto">
+              <h3 className="text-2xl md:text-3xl lg:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight text-center">
+                {aboutData.title}
+              </h3>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Photo + Biography - Alternating Layout */}
         <div className="mb-20 md:mb-28">

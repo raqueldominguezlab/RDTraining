@@ -9,10 +9,9 @@ export const AboutSection: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
-      required: true,
       localized: true,
       admin: {
-        description: 'Título de la sección (ej: "Mi Historia")',
+        description: 'Título de la sección (opcional; si se deja vacío no se muestra)',
       },
     },
     {
