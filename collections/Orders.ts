@@ -65,6 +65,13 @@ export const Orders: CollectionConfig = {
       type: 'number',
       defaultValue: 0,
     },
+    {
+      name: 'reminderSentAt',
+      type: 'date',
+      admin: {
+        description: 'Cuándo se envió el email de recordatorio de compra sin terminar',
+      },
+    },
   ],
   timestamps: true,
 }

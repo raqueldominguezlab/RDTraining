@@ -217,16 +217,18 @@ const productText = {
   es: {
     emailPlaceholder: 'tu@email.com',
     buyButton: (price: string) => `Comprar — ${price}`,
+    bizumButton: 'Pagar con Bizum',
     loading: 'Conectando con tu banco…',
-    secure: 'Pago seguro con tarjeta a través de Redsys. Recibirás el PDF en tu email al instante.',
+    secure: 'Pago seguro con tarjeta o Bizum a través de Redsys. Recibirás el PDF en tu email al instante.',
     genericError: 'No se pudo iniciar el pago',
     unexpectedError: 'Error inesperado, inténtalo de nuevo',
   },
   en: {
     emailPlaceholder: 'you@email.com',
     buyButton: (price: string) => `Buy — ${price}`,
+    bizumButton: 'Pay with Bizum',
     loading: 'Connecting to your bank…',
-    secure: 'Secure card payment via Redsys. You will receive the PDF in your email instantly.',
+    secure: 'Secure payment by card or Bizum via Redsys. You will receive the PDF in your email instantly.',
     genericError: 'Could not start the payment',
     unexpectedError: 'Unexpected error, please try again',
   },
@@ -243,14 +245,14 @@ function ProductBuyCard({ product, locale }: { product: Product; locale: 'es' | 
     currency: 'EUR',
   }).format(product.priceCents / 100)
 
-  const handleBuy = useCallback(async () => {
+  const handleBuy = useCallback(async (payMethod: 'card' | 'bizum' = 'card') => {
     setError(null)
     setLoading(true)
     try {
       const res = await fetch('/api/products/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: product.slug, email }),
+        body: JSON.stringify({ slug: product.slug, email, payMethod }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -316,11 +318,18 @@ function ProductBuyCard({ product, locale }: { product: Product; locale: 'es' | 
           className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base"
         />
         <button
-          onClick={handleBuy}
+          onClick={() => handleBuy('card')}
           disabled={loading || !email}
           className="w-full text-center bg-accent-500 hover:bg-accent-600 disabled:opacity-60 disabled:cursor-wait text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
         >
           {loading ? tr.loading : tr.buyButton(priceFormatted)}
+        </button>
+        <button
+          onClick={() => handleBuy('bizum')}
+          disabled={loading || !email}
+          className="w-full text-center bg-[#00c2c7] hover:bg-[#00aab0] disabled:opacity-60 disabled:cursor-wait text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+        >
+          {tr.bizumButton}
         </button>
         <p className="text-xs text-gray-500 dark:text-gray-400">{tr.secure}</p>
         {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}

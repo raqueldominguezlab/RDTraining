@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Payment gateway not configured' }, { status: 503 })
   }
 
-  let body: { slug?: string; email?: string }
+  let body: { slug?: string; email?: string; payMethod?: string }
   try {
     body = await req.json()
   } catch {
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
 
   const slug = String(body.slug ?? '').trim()
   const email = String(body.email ?? '').trim().toLowerCase()
+  const payMethod = body.payMethod === 'bizum' ? 'bizum' : 'card'
 
   if (!slug) {
     return NextResponse.json({ error: 'Falta el producto' }, { status: 400 })
@@ -79,6 +80,11 @@ export async function POST(req: NextRequest) {
     DS_MERCHANT_URLOK: `${SITE_URL}/gracias-programa`,
     DS_MERCHANT_URLKO: `${SITE_URL}/pago-programa-error`,
     DS_MERCHANT_PRODUCTDESCRIPTION: String(product.title).slice(0, 125),
+  }
+
+  // Bizum: la página de pago de Redsys muestra el flujo Bizum en vez de tarjeta
+  if (payMethod === 'bizum') {
+    merchantParams.DS_MERCHANT_PAYMETHODS = 'z'
   }
 
   const merchantParamsB64 = Buffer.from(JSON.stringify(merchantParams)).toString('base64')

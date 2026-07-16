@@ -210,6 +210,7 @@ export interface Order {
   downloadToken?: string | null;
   downloadExpiresAt?: string | null;
   downloadCount?: number | null;
+  reminderSentAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -370,6 +371,7 @@ export interface OrdersSelect<T extends boolean = true> {
   downloadToken?: T;
   downloadExpiresAt?: T;
   downloadCount?: T;
+  reminderSentAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
